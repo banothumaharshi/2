@@ -1,103 +1,53 @@
 #include <stdio.h>
-#include <string.h>
 #include <ctype.h>
 
-char lhs[20];
-char rhs[20][20][10];
-int n, count[20];
-
-char first[26][20][10];
-int fcount[26];
-
-int add(int nt, char *s)
+char prod[20][20];
+int n;
+int done[26] = {0};
+void first(char c)
 {
-    for (int i = 0; i < fcount[nt]; i++)
-        if (strcmp(first[nt][i], s) == 0)
-            return 0;
+    int i;
+    for (i = 0; i < n; i++)
+    {
+        if (prod[i][0] == c)
+        {
+            char ch = prod[i][3];
 
-    strcpy(first[nt][fcount[nt]++], s);
-    return 1;
+            if (ch == 'i' && prod[i][4] == 'd')
+                printf("id ");
+            else if (!isupper(ch))
+                printf("%c ", ch);
+            else if (ch != c)
+                first(ch);
+        }
+    }
 }
 
 int main()
 {
+    int i;
+
     printf("Enter number of productions: ");
     scanf("%d", &n);
+    char c;
+    printf("Enter productions:\n");
 
-    printf("Enter productions (Example: E->E+T):\n");
-
-    for (int i = 0; i < n; i++)
-    {
-        char line[50];
-        scanf("%s", line);
-
-        int nt = line[0] - 'A';
-        int j = 3, k = 0;
-
-        lhs[i] = line[0];
-
-        while (line[j])
-        {
-            if (isupper(line[j]))
-            {
-                rhs[i][k][0] = line[j++];
-                rhs[i][k++][1] = '\0';
-            }
-            else if (islower(line[j]))
-            {
-                int p = 0;
-                while (islower(line[j]))
-                    rhs[i][k][p++] = line[j++];
-                rhs[i][k++][p] = '\0';
-            }
-            else
-            {
-                rhs[i][k][0] = line[j++];
-                rhs[i][k++][1] = '\0';
-            }
-        }
-
-        count[i] = k;
-    }
-
-    int changed;
-
-    do
-    {
-        changed = 0;
-
-        for (int i = 0; i < n; i++)
-        {
-            int nt = lhs[i] - 'A';
-            char *s = rhs[i][0];
-
-            if (isupper(s[0]))
-            {
-                int x = s[0] - 'A';
-
-                for (int j = 0; j < fcount[x]; j++)
-                    changed |= add(nt, first[x][j]);
-            }
-            else
-            {
-                changed |= add(nt, s);
-            }
-        }
-
-    } while (changed);
+    for (i = 0; i < n; i++)
+        scanf("%s", prod[i]);
 
     printf("\nFIRST sets:\n");
 
-    for (int i = 0; i < 26; i++)
+    for (i = 0; i < n; i++)
     {
-        if (fcount[i])
+        c = prod[i][0];
+
+        if (done[c - 'A'] == 0)
         {
-            printf("FIRST(%c) = { ", i + 'A');
-
-            for (int j = 0; j < fcount[i]; j++)
-                printf("%s ", first[i][j]);
-
+            printf("FIRST(%c) = { ", c);
+            first(c);
             printf("}\n");
+
+            done[c - 'A'] = 1;
         }
     }
 
